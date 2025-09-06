@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Tarefas</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Estilo do cabeçalho */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #333;
+            font-size: 14px;
+            color: #888;
+        }
+
+        .status {
+            color: #fff;
+            font-weight: bold;
+        }
+        
+        .header-buttons {
+            display: flex;
+            align-items: center;
+        }
+
+        .header-link {
+            color: #888;
+            text-decoration: none;
+            margin: 0 auto;
+        }
+
+        /* Estilo dos botões */
+        .header-button {
+            background-color: transparent;
+            color: #888;
+            border: 1px solid #888;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin-left: 20px;
+        }
+        
+        .header-button:hover {
+            color: #fff;
+            border-color: #fff;
+        }
+
+        /* Estilo do botão de modo */
+        .mode-toggle-button {
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            margin-left: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+        }
+
+        .mode-icon {
+            fill: #fff; /* Cor do ícone para o modo escuro */
+        }
+        
+        .mode-icon.sun {
+            display: block;
+        }
+
+        .mode-icon.moon {
+            display: none;
+        }
+
+        /* Estilo da lista de tarefas */
+        .task-list {
+            list-style-type: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #222;
+        }
+
+        .task-item:last-child {
+            border-bottom: none;
+        }
+        
+        /* Garante que o nome e a caixa de anotações comecem do mesmo lugar */
+        .task-item-left {
+            display: flex;
+            align-items: center;
+            width: 250px;
+            flex-shrink: 0;
+        }
+        
+        .task-item-right {
+            flex-grow: 1;
+        }
+
+        .task-item input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 1px solid #555;
+            background-color: transparent;
+            cursor: pointer;
+            margin-right: 15px;
+        }
+
+        .task-item input[type="checkbox"]:checked {
+            background-color: transparent;
+            border-color: #0f0;
+        }
+
+        .task-item input[type="checkbox"]:checked::after {
+            content: '✓';
+            font-size: 16px;
+            color: #0f0;
+            display: block;
+            text-align: center;
+            line-height: 18px;
+        }
+
+        .task-item span.task-name {
+            font-size: 18px;
+            color: #fff;
+            white-space: nowrap;
+            flex-grow: 1;
+            text-align: center;
+        }
+
+        input.task-name-edit {
+            border: 1px solid #555;
+            background-color: #111;
+            color: #fff;
+            font-size: 18px;
+            flex-grow: 1;
+            text-align: center;
+            padding: 2px 5px;
+            width: 100%;
+        }
+        
+        .notes-text-box {
+            background-color: #111;
+            color: #fff;
+            border: 1px solid #333;
+            padding: 5px;
+            font-family: sans-serif;
+            font-size: 14px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* Estilos dos botões de ação do item (lixeira e lápis) */
+        .item-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: 15px;
+        }
+
+        .item-actions .action-icon {
+            cursor: pointer;
+            width: 20px;
+            height: 20px;
+            fill: #888;
+            transition: fill 0.2s ease-in-out;
+        }
+
+        .item-actions .action-icon:hover {
+            fill: #fff;
+        }
+
+        /* Estilos para o botão de adicionar item */
+        .add-item-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .add-item-button {
+            background-color: #555;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        .add-item-button:hover {
+            background-color: #777;
+        }
+
+        /* Estilos para modo claro */
+        .light-mode {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        .light-mode .header {
+            border-bottom-color: #ccc;
+        }
+        
+        .light-mode .status,
+        .light-mode .task-item span.task-name {
+            color: #333;
+        }
+
+        .light-mode .header-link {
+            color: #666;
+        }
+        
+        .light-mode .header-button {
+            color: #666;
+            border-color: #666;
+        }
+
+        .light-mode .header-button:hover {
+            color: #000;
+            border-color: #000;
+        }
+
+        .light-mode .task-item {
+            border-bottom-color: #ddd;
+        }
+        
+        .light-mode .task-item input[type="checkbox"] {
+            border-color: #999;
+        }
+
+        .light-mode .notes-text-box, .light-mode input.task-name-edit {
+            background-color: #e9e9e9;
+            color: #333;
+            border-color: #ccc;
+        }
+        
+        .light-mode .mode-icon, .light-mode .action-icon {
+            fill: #000;
+        }
+        
+        .light-mode .action-icon:hover {
+            fill: #333;
+        }
+
+        .light-mode .mode-icon.sun {
+            display: none;
+        }
+
+        .light-mode .mode-icon.moon {
+            display: block;
+        }
+
+        .light-mode .add-item-button {
+            background-color: #ddd;
+            color: #333;
+        }
+        
+        .light-mode .add-item-button:hover {
+            background-color: #ccc;
+        }
+
+        /* Estilos de cor para itens concluídos */
+        .completed .task-name,
+        .completed .notes-text-box {
+            text-decoration: line-through;
+            color: #888 !important;
+        }
+        
+        .light-mode .completed .task-name,
+        .light-mode .completed .notes-text-box {
+            color: #aaa !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <span class="status"></span>
+            <a href="#" class="header-link">ANOTAÇÕES</a>
+            <div class="header-buttons">
+                <button id="remove-all-notes" class="header-button">Remover Anotações</button>
+                <button id="uncheck-all" class="header-button">Desmarcar Todos</button>
+                <button id="mode-toggle" class="mode-toggle-button">
+                    <svg id="sun-icon" class="mode-icon sun" xmlns="http://www.w.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1010 10A10 10 0 0012 2zm0 18a8 8 0 118-8 8 8 0 01-8 8z"/><circle cx="12" cy="12" r="3"/><path d="M12 4.5a.5.5 0 01.5.5v2a.5.5 0 01-1 0v-2a.5.5 0 01.5-.5zM12 17.5a.5.5 0 01.5.5v2a.5.5 0 01-1 0v-2a.5.5 0 01.5-.5zM19.5 12a.5.5 0 01-.5.5h-2a.5.5 0 010-1h2a.5.5 0 01.5.5zM4.5 12a.5.5 0 01-.5.5h-2a.5.5 0 010-1h2a.5.5 0 01.5.5zM16.929 7.071a.5.5 0 010 .707l-1.414 1.414a.5.5 0 01-.707 0l-.707-.707a.5.5 0 010-.707l1.414-1.414a.5.5 0 01.707 0zM8.414 15.586a.5.5 0 010 .707l-1.414 1.414a.5.5 0 01-.707 0l-.707-.707a.5.5 0 010-.707l1.414-1.414a.5.5 0 01.707 0zM7.071 7.071a.5.5 0 010 .707l-1.414 1.414a.5.5 0 01-.707 0l-.707-.707a.5.5 0 010-.707l1.414-1.414a.5.5 0 01.707 0zM15.586 15.586a.5.5 0 010 .707l-1.414 1.414a.5.5 0 01-.707 0l-.707-.707a.5.5 0 010-.707l1.414-1.414a.5.5 0 01.707 0z"/></svg>
+                    <svg id="moon-icon" class="mode-icon moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2A10 10 0 1012 2zM12 21a9 9 0 01-9-9 8.92 8.92 0 013-6.5C7.2 5.92 10.68 5.48 12 5a9 9 0 019 9c0 4.96-4.04 9-9 9z"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <ul id="task-list" class="task-list">
+            </ul>
+
+        <div class="add-item-container">
+            <button id="add-item-button" class="add-item-button">+ Adicionar</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const taskList = document.getElementById('task-list');
+            const addItemButton = document.getElementById('add-item-button');
+            const uncheckAllButton = document.getElementById('uncheck-all');
+            const removeAllNotesButton = document.getElementById('remove-all-notes');
+            const modeToggleBtn = document.getElementById('mode-toggle');
+            const body = document.body;
+
+            // --- FUNÇÕES DE DADOS (localStorage) ---
+
+            const saveTasks = () => {
+                const tasks = [];
+                document.querySelectorAll('.task-item').forEach(item => {
+                    const nameElement = item.querySelector('.task-name') || item.querySelector('.task-name-edit');
+                    const taskName = nameElement.tagName === 'INPUT' ? nameElement.value : nameElement.textContent;
+                    const notes = item.querySelector('.notes-text-box').value;
+                    const isCompleted = item.classList.contains('completed');
+                    tasks.push({ name: taskName, notes: notes, completed: isCompleted });
+                });
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+            };
+
+            const loadTasks = () => {
+                const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+                tasks.forEach(taskData => {
+                    createNewTaskItem(taskData.name, taskData.notes, taskData.completed);
+                });
+                updateStatus();
+            };
+
+            // --- FUNÇÕES DE UI (INTERFACE DO USUÁRIO) ---
+
+            const updateStatus = () => {
+                const completedTasks = document.querySelectorAll('.task-item.completed').length;
+                const totalTasks = document.querySelectorAll('.task-item').length;
+                const statusElement = document.querySelector('.status');
+                statusElement.textContent = `${completedTasks}/${totalTasks} Concluído`;
+            };
+
+            const createNewTaskItem = (name = 'Nova Tarefa', notes = '', isCompleted = false) => {
+                const listItem = document.createElement('li');
+                listItem.classList.add('task-item');
+                if (isCompleted) {
+                    listItem.classList.add('completed');
+                }
+
+                listItem.innerHTML = `
+                    <div class="task-item-left">
+                        <input type="checkbox" ${isCompleted ? 'checked' : ''}>
+                        <span class="task-name">${name}</span>
+                    </div>
+                    <div class="task-item-right">
+                        <input type="text" class="notes-text-box" placeholder="Anotações..." value="${notes}">
+                    </div>
+                    <div class="item-actions">
+                        <svg class="action-icon edit-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 20h9v-2H12v2zm-2.434-3.177l-4.243 4.243-1.414-1.414 4.243-4.243 1.414 1.414zM16.5 3c.276 0 .5.224.5.5v3h3V17h-1v-2h-2v2h-1v-4h2v2h1v-4h-2v2h-1v-2h2v1h-1v-2h2v-2h-1v-2h2v1h-1v-2h2V3.5c0-.276-.224-.5-.5-.5H12c-.276 0-.5.224-.5.5v2.5h1V3.5c0-.276.224-.5.5-.5zM12 12h-2v-2h2v2zM12 8h-2V6h2v2zM12 4h-2V2h2v2zM16 16h-2v-2h2v2zM16 12h-2v-2h2v2zM16 8h-2V6h2v2zM20 16h-2v-2h2v2zM20 12h-2v-2h2v2zM20 8h-2V6h2v2z"/></svg>
+                        <svg class="action-icon delete-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16 9v10H8V9h8zm-1.5-6h-5L9 4H4v2h16V4h-5l-1.5-3zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7zm-2 2h-4v8h4V9zm-2 0H8v8h4V9z"/></svg>
+                    </div>
+                `;
+
+                taskList.append(listItem);
+                return listItem;
+            };
+            
+            const enterEditMode = (listItem) => {
+                const taskNameSpan = listItem.querySelector('.task-name');
+                if (!taskNameSpan) return;
+
+                const currentName = taskNameSpan.textContent;
+                const inputElement = document.createElement('input');
+                inputElement.type = 'text';
+                inputElement.value = currentName;
+                inputElement.className = 'task-name-edit';
+
+                taskNameSpan.replaceWith(inputElement);
+                inputElement.focus();
+                inputElement.select();
+
+                const saveEdit = () => {
+                    const newName = inputElement.value.trim() === '' ? 'Tarefa sem nome' : inputElement.value;
+                    const newSpan = document.createElement('span');
+                    newSpan.textContent = newName;
+                    newSpan.className = 'task-name';
+                    inputElement.replaceWith(newSpan);
+                    saveTasks();
+                };
+
+                inputElement.addEventListener('blur', saveEdit, { once: true });
+                inputElement.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        inputElement.blur();
+                    } else if (e.key === 'Escape') {
+                        const originalSpan = document.createElement('span');
+                        originalSpan.textContent = currentName;
+                        originalSpan.className = 'task-name';
+                        inputElement.replaceWith(originalSpan);
+                    }
+                });
+            };
+
+            const setMode = (mode) => {
+                body.classList.toggle('light-mode', mode === 'light');
+                localStorage.setItem('mode', mode);
+            };
+
+            // --- OUVINTES DE EVENTOS (EVENT LISTENERS) ---
+
+            addItemButton.addEventListener('click', () => {
+                const newItem = createNewTaskItem();
+                updateStatus();
+                enterEditMode(newItem);
+            });
+
+            uncheckAllButton.addEventListener('click', () => {
+                // *** MODIFICAÇÃO AQUI ***
+                if (confirm('Você tem certeza que deseja desmarcar todas as tarefas?')) {
+                    document.querySelectorAll('.task-item input[type="checkbox"]').forEach(checkbox => {
+                        checkbox.checked = false;
+                        checkbox.closest('.task-item').classList.remove('completed');
+                    });
+                    updateStatus();
+                    saveTasks();
+                }
+            });
+            
+            removeAllNotesButton.addEventListener('click', () => {
+                if (confirm('Você tem certeza que deseja remover TODAS as anotações?')) {
+                    document.querySelectorAll('.notes-text-box').forEach(input => {
+                        input.value = '';
+                    });
+                    saveTasks();
+                }
+            });
+            
+            modeToggleBtn.addEventListener('click', () => {
+                const isLightMode = body.classList.contains('light-mode');
+                setMode(isLightMode ? 'dark' : 'light');
+            });
+
+            taskList.addEventListener('click', (event) => {
+                const target = event.target;
+                if (target.closest('.delete-icon')) {
+                    if (confirm('Você tem certeza que deseja apagar esta tarefa?')) {
+                        target.closest('.task-item').remove();
+                        updateStatus();
+                        saveTasks();
+                    }
+                }
+                if (target.closest('.edit-icon')) {
+                    enterEditMode(target.closest('.task-item'));
+                }
+            });
+
+            taskList.addEventListener('change', (event) => {
+                if (event.target.type === 'checkbox') {
+                    event.target.closest('.task-item').classList.toggle('completed');
+                    updateStatus();
+                    saveTasks();
+                }
+            });
+
+            taskList.addEventListener('input', (event) => {
+                if (event.target.classList.contains('notes-text-box')) {
+                    saveTasks();
+                }
+            });
+
+            // --- INICIALIZAÇÃO DA PÁGINA ---
+            const initialMode = localStorage.getItem('mode') || 'dark';
+            setMode(initialMode);
+            loadTasks();
+        });
+    </script>
+</body>
+</html>
