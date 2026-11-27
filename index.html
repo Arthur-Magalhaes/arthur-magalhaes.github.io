@@ -1,498 +1,803 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista de Tarefas</title>
-    <meta name="google-adsense-account" content="ca-pub-4653079439151794">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4653079439151794"
-     crossorigin="anonymous"></script>
+    <title>Comparador de Armas Gogma-Artianas</title>
     <style>
+        :root {
+            --bg-color: #f4f4f9;
+            --text-color: #333;
+            --title-color: #2c3e50;
+            --table-bg: #fff;
+            --cell-border: #ccc;
+            --cell-active-bg: #ecf0f1;
+            --instructions-color: #666;
+            --btn-bg: #3498db;
+            --btn-hover: #2980b9;
+            --row-even: #ffffff;
+            --row-odd: #f9f9f9;
+            --header-bg: #e2e8f0;
+            --tab-bg: #e2e8f0;
+            --tab-active: #3498db;
+            --tab-text: #333;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --text-color: #f4f4f9;
+            --title-color: #f1c40f;
+            --table-bg: #222222;
+            --cell-border: #333333;
+            --cell-active-bg: #383838;
+            --instructions-color: #aaa;
+            --btn-bg: #2980b9;
+            --btn-hover: #3498db;
+            --row-even: #252525;
+            --row-odd: #2c2c2c;
+            --header-bg: #1e1e1e;
+            --tab-bg: #2c2c2c;
+            --tab-active: #2980b9;
+            --tab-text: #f4f4f9;
+        }
+
         body {
-            background-color: #000;
-            color: #fff;
-            font-family: sans-serif;
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
             margin: 0;
             padding: 20px;
+            color: var(--text-color);
+            transition: background 0.3s, color 0.3s;
         }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
+        h1 {
+            text-align: center;
+            color: var(--title-color);
+            margin-bottom: 10px;
         }
-
-        /* Estilo do cabeçalho */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #333;
-            font-size: 14px;
-            color: #888;
-        }
-
-        .status {
-            color: #fff;
-            font-weight: bold;
-        }
-        
-        .header-buttons {
+        .sheets-bar {
             display: flex;
             align-items: center;
+            gap: 5px;
+            margin-bottom: 15px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+            border-bottom: 2px solid var(--cell-border);
+            flex-wrap: wrap;
         }
-
-        .header-link {
-            color: #888;
-            text-decoration: none;
-            margin: 0 auto;
-        }
-
-        /* Estilo dos botões */
-        .header-button {
-            background-color: transparent;
-            color: #888;
-            border: 1px solid #888;
-            padding: 5px 10px;
-            cursor: pointer;
-            margin-left: 20px;
-        }
-        
-        .header-button:hover {
-            color: #fff;
-            border-color: #fff;
-        }
-
-        /* Estilo do botão de modo */
-        .mode-toggle-button {
-            background: none;
+        .sheet-tab {
+            padding: 8px 15px;
+            background-color: var(--tab-bg);
+            color: var(--tab-text);
             border: none;
-            padding: 0;
+            border-radius: 5px 5px 0 0;
             cursor: pointer;
-            margin-left: 20px;
+            font-weight: bold;
+            transition: background 0.2s;
+            white-space: nowrap;
+            user-select: none;
+            display: inline-flex;
+            align-items: center;
+        }
+        .sheet-tab.active {
+            background-color: var(--tab-active);
+            color: white;
+        }
+        .sheet-tab.dragging {
+            opacity: 0.4;
+        }
+        .main-tab {
+            background-color: #d4ac0d !important;
+            color: #fff !important;
+        }
+        .main-tab.active {
+            background-color: #f1c40f !important;
+            color: #1a1a1a !important;
+        }
+        .add-sheet-btn {
+            background-color: #27ae60 !important;
+            padding: 8px 12px;
+            border-radius: 5px !important;
+            color: white;
+        }
+        .add-sheet-btn:hover {
+            background-color: #219653 !important;
+        }
+        .delete-sheet-btn {
+            background-color: #e74c3c !important;
+            padding: 8px 12px;
+            border-radius: 5px !important;
+            margin-left: auto;
+            color: white;
+        }
+        .delete-sheet-btn:hover {
+            background-color: #c0392b !important;
+        }
+        .controls {
             display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: var(--btn-bg);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background-color: var(--btn-hover);
+        }
+        .table-container {
+            overflow-x: auto;
+            display: flex;
+            justify-content: center;
+        }
+        table {
+            border-collapse: collapse;
+            background: var(--table-bg);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        th {
+            background-color: var(--header-bg);
+            border: 1px solid var(--cell-border);
+            padding: 10px;
+            font-weight: bold;
+            color: var(--text-color);
+            min-width: 150px;
+            cursor: pointer;
+            user-select: none;
+        }
+        th:hover {
+            background-color: var(--cell-active-bg);
+        }
+        .corner-th {
+            cursor: default;
+        }
+        .corner-th:hover {
+            background-color: var(--header-bg);
+        }
+        .row-header {
+            background-color: var(--header-bg);
+            border: 1px solid var(--cell-border);
+            text-align: center;
+            font-weight: bold;
+            color: var(--text-color);
+            width: 70px;
+            height: 160px;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .row-header:hover {
+            background-color: #27ae60;
+            color: white;
+        }
+        tr.row-done td.data-cell {
+            opacity: 0.45;
+            background-color: rgba(39, 174, 96, 0.15) !important;
+        }
+        tr.row-done th.row-header {
+            background-color: #27ae60 !important;
+            color: white !important;
+        }
+        .row-done-label {
+            display: block;
+            font-size: 11px;
+            color: #27ae60;
+            font-weight: bold;
+            margin-top: 2px;
+            letter-spacing: 0.5px;
+        }
+        tr.row-done .row-done-label {
+            color: #ffffff;
+        }
+
+        tr:nth-child(even) td.data-cell {
+            background-color: var(--row-even);
+        }
+        tr:nth-child(odd) td.data-cell {
+            background-color: var(--row-odd);
+        }
+        td.data-cell {
+            width: 160px;
+            height: 160px;
+            border: 2px dashed var(--cell-border);
+            text-align: center;
+            vertical-align: middle;
+            position: relative;
+            cursor: pointer;
+            transition: border-color 0.2s, background-color 0.2s, opacity 0.2s;
+            padding: 5px;
+        }
+        td.data-cell.active {
+            border-color: #3498db !important;
+            background-color: var(--cell-active-bg) !important;
+        }
+        td.data-cell img {
+            max-width: 100%;
+            max-height: 110px;
+            object-fit: contain;
+        }
+        .cell-info {
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--title-color);
+            margin-top: 5px;
+            background: var(--header-bg);
+            padding: 3px 6px;
+            border-radius: 4px;
+            display: inline-block;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        [data-theme="dark"] .cell-info {
+            color: #f1c40f;
+        }
+        .cell-btn {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            font-size: 14px;
+            display: none;
             align-items: center;
             justify-content: center;
-            width: 24px;
-            height: 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 2;
         }
-
-        .mode-icon {
-            fill: #fff; /* Cor do ícone para o modo escuro */
+        [data-theme="dark"] .cell-btn {
+            background: rgba(50, 50, 50, 0.9);
+            color: #fff;
         }
-        
-        .mode-icon.sun {
-            display: block;
+        .favorite-btn {
+            top: 5px;
+            right: 5px;
         }
-
-        .mode-icon.moon {
-            display: none;
+        .delete-btn {
+            top: 5px;
+            left: 5px;
+            color: #e74c3c;
+            font-weight: bold;
         }
-
-        /* Estilo da lista de tarefas */
-        .task-list {
-            list-style-type: none;
-            padding: 0;
-            margin-top: 20px;
-        }
-
-        .task-item {
+        td.data-cell:hover .favorite-btn, td.data-cell.favorited .favorite-btn {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #222;
         }
-
-        .task-item:last-child {
-            border-bottom: none;
-        }
-        
-        /* Garante que o nome e a caixa de anotações comecem do mesmo lugar */
-        .task-item-left {
+        td.data-cell:has(img):hover .delete-btn {
             display: flex;
-            align-items: center;
-            width: 250px;
-            flex-shrink: 0;
         }
-        
-        .task-item-right {
-            flex-grow: 1;
+        td.data-cell.favorited {
+            border: 3px solid #f1c40f;
         }
-
-        .task-item input[type="checkbox"] {
-            appearance: none;
-            -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
-            border: 1px solid #555;
-            background-color: transparent;
-            cursor: pointer;
-            margin-right: 15px;
+        td.data-cell.favorited .favorite-btn {
+            color: #f1c40f;
         }
-
-        .task-item input[type="checkbox"]:checked {
-            background-color: transparent;
-            border-color: #0f0;
-        }
-
-        .task-item input[type="checkbox"]:checked::after {
-            content: '✓';
-            font-size: 16px;
-            color: #0f0;
-            display: block;
+        .instructions {
             text-align: center;
-            line-height: 18px;
-        }
-
-        .task-item span.task-name {
-            font-size: 18px;
-            color: #fff;
-            white-space: nowrap;
-            flex-grow: 1;
-            text-align: center;
-        }
-
-        input.task-name-edit {
-            border: 1px solid #555;
-            background-color: #111;
-            color: #fff;
-            font-size: 18px;
-            flex-grow: 1;
-            text-align: center;
-            padding: 2px 5px;
-            width: 100%;
-        }
-        
-        .notes-text-box {
-            background-color: #111;
-            color: #fff;
-            border: 1px solid #333;
-            padding: 5px;
-            font-family: sans-serif;
+            margin-bottom: 15px;
             font-size: 14px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        /* Estilos dos botões de ação do item (lixeira e lápis) */
-        .item-actions {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-left: 15px;
-        }
-
-        .item-actions .action-icon {
-            cursor: pointer;
-            width: 20px;
-            height: 20px;
-            fill: #888;
-            transition: fill 0.2s ease-in-out;
-        }
-
-        .item-actions .action-icon:hover {
-            fill: #fff;
-        }
-
-        /* Estilos para o botão de adicionar item */
-        .add-item-container {
-            margin-top: 20px;
-            text-align: center;
-        }
-
-        .add-item-button {
-            background-color: #555;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 5px;
-            transition: background-color 0.2s ease-in-out;
-        }
-
-        .add-item-button:hover {
-            background-color: #777;
-        }
-
-        /* Estilos para modo claro */
-        .light-mode {
-            background-color: #f0f0f0;
-            color: #333;
-        }
-
-        .light-mode .header {
-            border-bottom-color: #ccc;
-        }
-        
-        .light-mode .status,
-        .light-mode .task-item span.task-name {
-            color: #333;
-        }
-
-        .light-mode .header-link {
-            color: #666;
-        }
-        
-        .light-mode .header-button {
-            color: #666;
-            border-color: #666;
-        }
-
-        .light-mode .header-button:hover {
-            color: #000;
-            border-color: #000;
-        }
-
-        .light-mode .task-item {
-            border-bottom-color: #ddd;
-        }
-        
-        .light-mode .task-item input[type="checkbox"] {
-            border-color: #999;
-        }
-
-        .light-mode .notes-text-box, .light-mode input.task-name-edit {
-            background-color: #e9e9e9;
-            color: #333;
-            border-color: #ccc;
-        }
-        
-        .light-mode .mode-icon, .light-mode .action-icon {
-            fill: #000;
-        }
-        
-        .light-mode .action-icon:hover {
-            fill: #333;
-        }
-
-        .light-mode .mode-icon.sun {
-            display: none;
-        }
-
-        .light-mode .mode-icon.moon {
-            display: block;
-        }
-
-        .light-mode .add-item-button {
-            background-color: #ddd;
-            color: #333;
-        }
-        
-        .light-mode .add-item-button:hover {
-            background-color: #ccc;
-        }
-
-        /* Estilos de cor para itens concluídos */
-        .completed .task-name,
-        .completed .notes-text-box {
-            text-decoration: line-through;
-            color: #888 !important;
-        }
-        
-        .light-mode .completed .task-name,
-        .light-mode .completed .notes-text-box {
-            color: #aaa !important;
+            color: var(--instructions-color);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header class="header">
-            <span class="status"></span>
-            <a href="#" class="header-link">ANOTAÇÕES</a>
-            <div class="header-buttons">
-                <button id="remove-all-notes" class="header-button">Remover Anotações</button>
-                <button id="uncheck-all" class="header-button">Desmarcar Todos</button>
-                <button id="mode-toggle" class="mode-toggle-button">
-                    <svg id="sun-icon" class="mode-icon sun" xmlns="http://www.w.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1010 10A10 10 0 0012 2zm0 18a8 8 0 118-8 8 8 0 01-8 8z"/><circle cx="12" cy="12" r="3"/><path d="M12 4.5a.5.5 0 01.5.5v2a.5.5 0 01-1 0v-2a.5.5 0 01.5-.5zM12 17.5a.5.5 0 01.5.5v2a.5.5 0 01-1 0v-2a.5.5 0 01.5-.5zM19.5 12a.5.5 0 01-.5.5h-2a.5.5 0 010-1h2a.5.5 0 01.5.5zM4.5 12a.5.5 0 01-.5.5h-2a.5.5 0 010-1h2a.5.5 0 01.5.5zM16.929 7.071a.5.5 0 010 .707l-1.414 1.414a.5.5 0 01-.707 0l-.707-.707a.5.5 0 010-.707l1.414-1.414a.5.5 0 01.707 0zM8.414 15.586a.5.5 0 010 .707l-1.414 1.414a.5.5 0 01-.707 0l-.707-.707a.5.5 0 010-.707l1.414-1.414a.5.5 0 01.707 0zM7.071 7.071a.5.5 0 010 .707l-1.414 1.414a.5.5 0 01-.707 0l-.707-.707a.5.5 0 010-.707l1.414-1.414a.5.5 0 01.707 0zM15.586 15.586a.5.5 0 010 .707l-1.414 1.414a.5.5 0 01-.707 0l-.707-.707a.5.5 0 010-.707l1.414-1.414a.5.5 0 01.707 0z"/></svg>
-                    <svg id="moon-icon" class="mode-icon moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2A10 10 0 1012 2zM12 21a9 9 0 01-9-9 8.92 8.92 0 013-6.5C7.2 5.92 10.68 5.48 12 5a9 9 0 019 9c0 4.96-4.04 9-9 9z"/></svg>
-                </button>
-            </div>
-        </header>
 
-        <ul id="task-list" class="task-list">
-            </ul>
+    <h1>Comparador de Armas Gogma-Artianas</h1>
 
-        <div class="add-item-container">
-            <button id="add-item-button" class="add-item-button">+ Adicionar</button>
-        </div>
+    <div class="sheets-bar" id="sheetsBar"></div>
+    
+    <div class="instructions">
+        Arraste as abas no topo para reorganizá-las. Clique em uma célula e pressione <strong>Ctrl + V</strong> para colar a imagem.<br>
+        <em>Dica: Na aba Principal, clique no número da linha para marcá-la como <strong>FEITO</strong>. Dê duplo clique nas abas/colunas para renomear.</em>
+    </div>
+
+    <div class="controls" id="controlsBar">
+        <button onclick="addLine()">Adicionar Linha</button>
+        <button onclick="removeLine()">Remover Linha</button>
+        <button onclick="addColumn()">Adicionar Coluna</button>
+        <button onclick="removeColumn()">Remover Coluna</button>
+        <button onclick="toggleTheme()" id="themeBtn">☀️ Modo Claro</button>
+    </div>
+
+    <div class="table-container">
+        <table id="comparisonTable"></table>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const taskList = document.getElementById('task-list');
-            const addItemButton = document.getElementById('add-item-button');
-            const uncheckAllButton = document.getElementById('uncheck-all');
-            const removeAllNotesButton = document.getElementById('remove-all-notes');
-            const modeToggleBtn = document.getElementById('mode-toggle');
-            const body = document.body;
+        const weaponNames = [
+            "Arco", "Berrante de Caça", "Duplas-lâminas", "Espada e Escudo", 
+            "Espada Longa", "Espadão", "Fuzilarco Leve", "Fuzilarco Pesado", 
+            "Glaive Inseto", "Lâmina Dínamo (Lâmina de Carga)", "Lança", "Lançarma", "Martelo", "Transmachado"
+        ];
 
-            // --- FUNÇÕES DE DADOS (localStorage) ---
+        let sheets = [
+            {
+                name: "⭐ Principal",
+                isMain: true,
+                rows: 10,
+                cols: 4,
+                columnNames: [],
+                doneRows: {}
+            }
+        ];
 
-            const saveTasks = () => {
-                const tasks = [];
-                document.querySelectorAll('.task-item').forEach(item => {
-                    const nameElement = item.querySelector('.task-name') || item.querySelector('.task-name-edit');
-                    const taskName = nameElement.tagName === 'INPUT' ? nameElement.value : nameElement.textContent;
-                    const notes = item.querySelector('.notes-text-box').value;
-                    const isCompleted = item.classList.contains('completed');
-                    tasks.push({ name: taskName, notes: notes, completed: isCompleted });
-                });
-                localStorage.setItem('tasks', JSON.stringify(tasks));
-            };
+        weaponNames.forEach(name => {
+            sheets.push({
+                name: name,
+                isMain: false,
+                rows: 10,
+                cols: 5,
+                columnNames: ["Dragão", "Fogo", "Raio", "Água", "Gelo"],
+                data: {}
+            });
+        });
 
-            const loadTasks = () => {
-                const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-                tasks.forEach(taskData => {
-                    createNewTaskItem(taskData.name, taskData.notes, taskData.completed);
-                });
-                updateStatus();
-            };
+        let currentSheetIndex = 1;
+        let selectedCell = null;
+        let draggedSheetIndex = null;
 
-            // --- FUNÇÕES DE UI (INTERFACE DO USUÁRIO) ---
-
-            const updateStatus = () => {
-                const completedTasks = document.querySelectorAll('.task-item.completed').length;
-                const totalTasks = document.querySelectorAll('.task-item').length;
-                const statusElement = document.querySelector('.status');
-                statusElement.textContent = `${completedTasks}/${totalTasks} Concluído`;
-            };
-
-            const createNewTaskItem = (name = 'Nova Tarefa', notes = '', isCompleted = false) => {
-                const listItem = document.createElement('li');
-                listItem.classList.add('task-item');
-                if (isCompleted) {
-                    listItem.classList.add('completed');
-                }
-
-                listItem.innerHTML = `
-                    <div class="task-item-left">
-                        <input type="checkbox" ${isCompleted ? 'checked' : ''}>
-                        <span class="task-name">${name}</span>
-                    </div>
-                    <div class="task-item-right">
-                        <input type="text" class="notes-text-box" placeholder="Anotações..." value="${notes}">
-                    </div>
-                    <div class="item-actions">
-                        <svg class="action-icon edit-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 20h9v-2H12v2zm-2.434-3.177l-4.243 4.243-1.414-1.414 4.243-4.243 1.414 1.414zM16.5 3c.276 0 .5.224.5.5v3h3V17h-1v-2h-2v2h-1v-4h2v2h1v-4h-2v2h-1v-2h2v1h-1v-2h2v-2h-1v-2h2v1h-1v-2h2V3.5c0-.276-.224-.5-.5-.5H12c-.276 0-.5.224-.5.5v2.5h1V3.5c0-.276.224-.5.5-.5zM12 12h-2v-2h2v2zM12 8h-2V6h2v2zM12 4h-2V2h2v2zM16 16h-2v-2h2v2zM16 12h-2v-2h2v2zM16 8h-2V6h2v2zM20 16h-2v-2h2v2zM20 12h-2v-2h2v2zM20 8h-2V6h2v2z"/></svg>
-                        <svg class="action-icon delete-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16 9v10H8V9h8zm-1.5-6h-5L9 4H4v2h16V4h-5l-1.5-3zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7zm-2 2h-4v8h4V9zm-2 0H8v8h4V9z"/></svg>
-                    </div>
-                `;
-
-                taskList.append(listItem);
-                return listItem;
-            };
+        function getColumnName(sheet, index) {
+            if (sheet.columnNames[index] !== undefined && sheet.columnNames[index] !== '') {
+                return sheet.columnNames[index];
+            }
+            if (sheet.isMain) return `Slot ${index + 1}`;
             
-            const enterEditMode = (listItem) => {
-                const taskNameSpan = listItem.querySelector('.task-name');
-                if (!taskNameSpan) return;
+            let name = '';
+            let tempIndex = index;
+            while (tempIndex >= 0) {
+                name = String.fromCharCode((tempIndex % 26) + 65) + name;
+                tempIndex = Math.floor(tempIndex / 26) - 1;
+            }
+            return name;
+        }
 
-                const currentName = taskNameSpan.textContent;
-                const inputElement = document.createElement('input');
-                inputElement.type = 'text';
-                inputElement.value = currentName;
-                inputElement.className = 'task-name-edit';
+        function renderSheetsBar() {
+            const bar = document.getElementById('sheetsBar');
+            bar.innerHTML = '';
 
-                taskNameSpan.replaceWith(inputElement);
-                inputElement.focus();
-                inputElement.select();
-
-                const saveEdit = () => {
-                    const newName = inputElement.value.trim() === '' ? 'Tarefa sem nome' : inputElement.value;
-                    const newSpan = document.createElement('span');
-                    newSpan.textContent = newName;
-                    newSpan.className = 'task-name';
-                    inputElement.replaceWith(newSpan);
-                    saveTasks();
+            sheets.forEach((sheet, idx) => {
+                const btn = document.createElement('button');
+                btn.className = `sheet-tab ${idx === currentSheetIndex ? 'active' : ''} ${sheet.isMain ? 'main-tab' : ''}`;
+                btn.innerHTML = sheet.name;
+                btn.draggable = true;
+                
+                btn.ondragstart = (e) => {
+                    draggedSheetIndex = idx;
+                    e.dataTransfer.setData('text/plain', idx);
+                    setTimeout(() => btn.classList.add('dragging'), 0);
                 };
 
-                inputElement.addEventListener('blur', saveEdit, { once: true });
-                inputElement.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') {
-                        inputElement.blur();
-                    } else if (e.key === 'Escape') {
-                        const originalSpan = document.createElement('span');
-                        originalSpan.textContent = currentName;
-                        originalSpan.className = 'task-name';
-                        inputElement.replaceWith(originalSpan);
+                btn.ondragend = () => {
+                    btn.classList.remove('dragging');
+                    draggedSheetIndex = null;
+                };
+
+                btn.ondragover = (e) => {
+                    e.preventDefault();
+                };
+
+                btn.ondrop = (e) => {
+                    e.preventDefault();
+                    if (draggedSheetIndex === null || draggedSheetIndex === idx) return;
+
+                    const targetIdx = idx;
+                    const draggedItem = sheets.splice(draggedSheetIndex, 1)[0];
+                    sheets.splice(targetIdx, 0, draggedItem);
+
+                    if (currentSheetIndex === draggedSheetIndex) {
+                        currentSheetIndex = targetIdx;
+                    } else if (currentSheetIndex > draggedSheetIndex && currentSheetIndex <= targetIdx) {
+                        currentSheetIndex--;
+                    } else if (currentSheetIndex < draggedSheetIndex && currentSheetIndex >= targetIdx) {
+                        currentSheetIndex++;
+                    }
+
+                    renderSheetsBar();
+                };
+
+                btn.onclick = () => {
+                    if (currentSheetIndex !== idx) {
+                        switchSheet(idx);
+                    }
+                };
+
+                if (!sheet.isMain) {
+                    btn.ondblclick = () => {
+                        const input = document.createElement('input');
+                        input.type = 'text';
+                        input.value = sheet.name;
+                        input.style.width = '110px';
+                        input.style.padding = '2px';
+                        input.style.textAlign = 'center';
+                        
+                        input.onblur = () => {
+                            const trimmed = input.value.trim();
+                            sheet.name = trimmed !== '' ? trimmed : `Arma ${idx}`;
+                            renderSheetsBar();
+                        };
+                        input.onkeydown = (e) => {
+                            if (e.key === 'Enter') input.blur();
+                        };
+
+                        btn.innerHTML = '';
+                        btn.appendChild(input);
+                        input.focus();
+                        input.select();
+                    };
+                }
+
+                bar.appendChild(btn);
+            });
+
+            const addBtn = document.createElement('button');
+            addBtn.className = 'sheet-tab add-sheet-btn';
+            addBtn.innerHTML = '+ Nova Planilha';
+            addBtn.onclick = addSheet;
+            bar.appendChild(addBtn);
+
+            if (sheets.length > 2) {
+                const delBtn = document.createElement('button');
+                delBtn.className = 'sheet-tab delete-sheet-btn';
+                delBtn.innerHTML = '🗑️ Excluir Planilha';
+                delBtn.onclick = deleteCurrentSheet;
+                bar.appendChild(delBtn);
+            }
+        }
+
+        function switchSheet(index) {
+            currentSheetIndex = index;
+            selectedCell = null;
+            renderSheetsBar();
+            loadCurrentSheet();
+            
+            const controlsBar = document.getElementById('controlsBar');
+            if (sheets[index].isMain) {
+                controlsBar.style.display = 'none';
+            } else {
+                controlsBar.style.display = 'flex';
+            }
+        }
+
+        function addSheet() {
+            sheets.push({
+                name: `Nova Planilha ${sheets.length}`,
+                isMain: false,
+                rows: 10,
+                cols: 5,
+                columnNames: ["Dragão", "Fogo", "Raio", "Água", "Gelo"],
+                data: {}
+            });
+            currentSheetIndex = sheets.length - 1;
+            selectedCell = null;
+            renderSheetsBar();
+            loadCurrentSheet();
+            document.getElementById('controlsBar').style.display = 'flex';
+        }
+
+        function deleteCurrentSheet() {
+            if (currentSheetIndex === 0) return;
+            if (sheets.length > 2) {
+                sheets.splice(currentSheetIndex, 1);
+                currentSheetIndex = Math.max(1, currentSheetIndex - 1);
+                selectedCell = null;
+                renderSheetsBar();
+                loadCurrentSheet();
+            }
+        }
+
+        function loadCurrentSheet() {
+            const table = document.getElementById('comparisonTable');
+            table.innerHTML = '';
+            const sheet = sheets[currentSheetIndex];
+
+            if (sheet.isMain) {
+                renderMainBoard();
+                return;
+            }
+
+            const headerTr = document.createElement('tr');
+            const cornerTh = document.createElement('th');
+            cornerTh.className = 'corner-th';
+            cornerTh.innerHTML = '#';
+            headerTr.appendChild(cornerTh);
+
+            for (let j = 0; j < sheet.cols; j++) {
+                headerTr.appendChild(createHeaderCell(sheet, j));
+            }
+            table.appendChild(headerTr);
+
+            for (let i = 0; i < sheet.rows; i++) {
+                const tr = document.createElement('tr');
+                
+                const rowTh = document.createElement('th');
+                rowTh.className = 'row-header';
+                rowTh.innerHTML = i + 1;
+                tr.appendChild(rowTh);
+
+                for (let j = 0; j < sheet.cols; j++) {
+                    const cellKey = `${i}_${j}`;
+                    const cellData = sheet.data[cellKey] || {};
+                    tr.appendChild(createCell(sheet, i, j, cellData));
+                }
+                table.appendChild(tr);
+            }
+        }
+
+        function createCell(sheet, rowIdx, colIdx, cellData) {
+            const td = document.createElement('td');
+            td.className = 'data-cell';
+            const cellKey = `${rowIdx}_${colIdx}`;
+
+            if (cellData.favorited) td.classList.add('favorited');
+            if (cellData.img) {
+                const img = document.createElement('img');
+                img.src = cellData.img;
+                td.appendChild(img);
+            }
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'cell-btn delete-btn';
+            deleteBtn.innerHTML = '✕';
+            deleteBtn.title = 'Remover imagem';
+            deleteBtn.onclick = (e) => {
+                e.stopPropagation();
+                const img = td.querySelector('img');
+                if (img) img.remove();
+                td.classList.remove('favorited');
+                
+                if (sheet.data[cellKey]) {
+                    delete sheet.data[cellKey].img;
+                    sheet.data[cellKey].favorited = false;
+                }
+            };
+            td.appendChild(deleteBtn);
+
+            const favBtn = document.createElement('button');
+            favBtn.className = 'cell-btn favorite-btn';
+            favBtn.innerHTML = '★';
+            favBtn.title = 'Favoritar';
+            favBtn.onclick = (e) => {
+                e.stopPropagation();
+                td.classList.toggle('favorited');
+                const isFav = td.classList.contains('favorited');
+
+                if (!sheet.data[cellKey]) sheet.data[cellKey] = {};
+                sheet.data[cellKey].favorited = isFav;
+                if (!td.querySelector('img')) sheet.data[cellKey].favorited = false;
+            };
+            td.appendChild(favBtn);
+
+            td.onclick = () => {
+                document.querySelectorAll('td.data-cell').forEach(cell => cell.classList.remove('active'));
+                td.classList.add('active');
+                selectedCell = td;
+                selectedCell.dataset.row = rowIdx;
+                selectedCell.dataset.col = colIdx;
+            };
+
+            return td;
+        }
+
+        function createHeaderCell(sheet, colIndex) {
+            const th = document.createElement('th');
+            th.innerHTML = getColumnName(sheet, colIndex);
+            
+            th.ondblclick = () => {
+                const currentName = th.innerHTML;
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = currentName;
+                input.style.width = '80%';
+                input.style.padding = '2px';
+                input.style.textAlign = 'center';
+                
+                input.onblur = () => {
+                    const trimmed = input.value.trim();
+                    sheet.columnNames[colIndex] = trimmed !== '' ? trimmed : getColumnName(sheet, colIndex);
+                    th.innerHTML = sheet.columnNames[colIndex];
+                };
+                input.onkeydown = (e) => {
+                    if (e.key === 'Enter') input.blur();
+                };
+
+                th.innerHTML = '';
+                th.appendChild(input);
+                input.focus();
+                input.select();
+            };
+            return th;
+        }
+
+        function renderMainBoard() {
+            const mainSheet = sheets[0];
+            let favoritesMap = {}; 
+
+            for (let s = 1; s < sheets.length; s++) {
+                const sObj = sheets[s];
+                if (!sObj.data) continue;
+
+                Object.keys(sObj.data).forEach(key => {
+                    const cellInfo = sObj.data[key];
+                    if (cellInfo && cellInfo.favorited && cellInfo.img) {
+                        const [rStr, cStr] = key.split('_');
+                        const r = parseInt(rStr);
+                        const c = parseInt(cStr);
+
+                        if (!favoritesMap[r]) favoritesMap[r] = [];
+                        const colName = getColumnName(sObj, c);
+                        favoritesMap[r].push({
+                            src: cellInfo.img,
+                            label: `${sObj.name} ➔ ${colName}`
+                        });
                     }
                 });
-            };
+            }
 
-            const setMode = (mode) => {
-                body.classList.toggle('light-mode', mode === 'light');
-                localStorage.setItem('mode', mode);
-            };
+            let maxRowIndex = 9;
+            let maxColCount = 1;
 
-            // --- EVENT LISTENERS ---
-
-            addItemButton.addEventListener('click', () => {
-                const newItem = createNewTaskItem();
-                updateStatus();
-                enterEditMode(newItem);
-            });
-
-            uncheckAllButton.addEventListener('click', () => {
-                // *** MODIFICAÇÃO AQUI ***
-                if (confirm('Você tem certeza que deseja desmarcar todas as tarefas?')) {
-                    document.querySelectorAll('.task-item input[type="checkbox"]').forEach(checkbox => {
-                        checkbox.checked = false;
-                        checkbox.closest('.task-item').classList.remove('completed');
-                    });
-                    updateStatus();
-                    saveTasks();
+            Object.keys(favoritesMap).forEach(rIdx => {
+                const r = parseInt(rIdx);
+                if (r > maxRowIndex) maxRowIndex = r;
+                if (favoritesMap[r].length > maxColCount) {
+                    maxColCount = favoritesMap[r].length;
                 }
             });
-            
-            removeAllNotesButton.addEventListener('click', () => {
-                if (confirm('Você tem certeza que deseja remover TODAS as anotações?')) {
-                    document.querySelectorAll('.notes-text-box').forEach(input => {
-                        input.value = '';
-                    });
-                    saveTasks();
-                }
-            });
-            
-            modeToggleBtn.addEventListener('click', () => {
-                const isLightMode = body.classList.contains('light-mode');
-                setMode(isLightMode ? 'dark' : 'light');
-            });
 
-            taskList.addEventListener('click', (event) => {
-                const target = event.target;
-                if (target.closest('.delete-icon')) {
-                    if (confirm('Você tem certeza que deseja apagar esta tarefa?')) {
-                        target.closest('.task-item').remove();
-                        updateStatus();
-                        saveTasks();
+            mainSheet.rows = maxRowIndex + 1;
+            mainSheet.cols = maxColCount;
+
+            const table = document.getElementById('comparisonTable');
+            table.innerHTML = '';
+
+            for (let i = 0; i < mainSheet.rows; i++) {
+                const tr = document.createElement('tr');
+                const isDone = mainSheet.doneRows && mainSheet.doneRows[i];
+                if (isDone) {
+                    tr.classList.add('row-done');
+                }
+                
+                const rowTh = document.createElement('th');
+                rowTh.className = 'row-header';
+                rowTh.innerHTML = `${i + 1}<span class="row-done-label">${isDone ? 'FEITO' : 'MARCAR'}</span>`;
+                
+                rowTh.onclick = () => {
+                    if (!mainSheet.doneRows) mainSheet.doneRows = {};
+                    mainSheet.doneRows[i] = !mainSheet.doneRows[i];
+                    renderMainBoard();
+                };
+                
+                tr.appendChild(rowTh);
+
+                const favsInRow = favoritesMap[i] || [];
+                for (let j = 0; j < mainSheet.cols; j++) {
+                    const td = document.createElement('td');
+                    td.className = 'data-cell';
+                    td.style.cursor = 'default';
+
+                    if (favsInRow[j]) {
+                        const img = document.createElement('img');
+                        img.src = favsInRow[j].src;
+                        td.appendChild(img);
+
+                        const info = document.createElement('div');
+                        info.className = 'cell-info';
+                        info.innerHTML = favsInRow[j].label;
+                        td.appendChild(info);
+
+                        td.classList.add('favorited');
                     }
+                    tr.appendChild(td);
                 }
-                if (target.closest('.edit-icon')) {
-                    enterEditMode(target.closest('.task-item'));
-                }
-            });
+                table.appendChild(tr);
+            }
+        }
 
-            taskList.addEventListener('change', (event) => {
-                if (event.target.type === 'checkbox') {
-                    event.target.closest('.task-item').classList.toggle('completed');
-                    updateStatus();
-                    saveTasks();
-                }
-            });
+        function addLine() {
+            const sheet = sheets[currentSheetIndex];
+            if (sheet.isMain) return;
+            sheet.rows++;
+            loadCurrentSheet();
+        }
 
-            taskList.addEventListener('input', (event) => {
-                if (event.target.classList.contains('notes-text-box')) {
-                    saveTasks();
+        function removeLine() {
+            const sheet = sheets[currentSheetIndex];
+            if (sheet.isMain) return;
+            if (sheet.rows > 1) {
+                for (let j = 0; j < sheet.cols; j++) {
+                    delete sheet.data[`${sheet.rows - 1}_${j}`];
                 }
-            });
+                sheet.rows--;
+                loadCurrentSheet();
+            }
+        }
 
-            // --- INICIALIZAÇÃO DA PÁGINA ---
-            const initialMode = localStorage.getItem('mode') || 'dark';
-            setMode(initialMode);
-            loadTasks();
+        function addColumn() {
+            const sheet = sheets[currentSheetIndex];
+            if (sheet.isMain) return;
+            sheet.cols++;
+            loadCurrentSheet();
+        }
+
+        function removeColumn() {
+            const sheet = sheets[currentSheetIndex];
+            if (sheet.isMain) return;
+            if (sheet.cols > 1) {
+                const removedCol = sheet.cols - 1;
+                for (let i = 0; i < sheet.rows; i++) {
+                    delete sheet.data[`${i}_${removedCol}`];
+                }
+                sheet.cols--;
+                // Correção: Remove exatamente o nome da coluna excluída pelo seu índice
+                sheet.columnNames.splice(removedCol, 1);
+                loadCurrentSheet();
+            }
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeButton(newTheme);
+        }
+
+        function updateThemeButton(theme) {
+            const btn = document.getElementById('themeBtn');
+            btn.innerHTML = theme === 'dark' ? '☀️ Modo Claro' : '🌙 Modo Escuro';
+        }
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        updateThemeButton(savedTheme);
+
+        window.addEventListener('paste', (e) => {
+            const sheet = sheets[currentSheetIndex];
+            if (sheet.isMain || !selectedCell) return;
+
+            const r = selectedCell.dataset.row;
+            const c = selectedCell.dataset.col;
+            if (r === undefined || c === undefined) return;
+
+            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+            for (let item of items) {
+                if (item.type.indexOf('image') === 0) {
+                    const blob = item.getAsFile();
+                    const reader = new FileReader();
+                    
+                    reader.onload = (event) => {
+                        const cellKey = `${r}_${c}`;
+                        if (!sheet.data[cellKey]) sheet.data[cellKey] = {};
+                        sheet.data[cellKey].img = event.target.result;
+
+                        const existingImg = selectedCell.querySelector('img');
+                        if (existingImg) existingImg.remove();
+
+                        const img = document.createElement('img');
+                        img.src = event.target.result;
+                        selectedCell.appendChild(img);
+                    };
+                    
+                    reader.readAsDataURL(blob);
+                    break;
+                }
+            }
         });
+
+        renderSheetsBar();
+        switchSheet(1);
     </script>
+
 </body>
 </html>
